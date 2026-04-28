@@ -1,0 +1,50 @@
+# Example device registry for Lumi V2.
+# Copy this file to `config/devices.yaml` and fill in your real device IPs and credentials.
+
+devices:
+  living_room_lamp:
+    ip: "192.168.0.116"
+    type: "esp_relay"
+    commands: ["on", "off", "toggle"]
+    Description: "Two lamps, one on either side of living room couch"
+    location: "living_room"
+    state: null
+
+  bedside_lamp:
+    ip: "192.168.0.115"
+    type: "esp_relay"
+    commands: ["on", "off", "toggle"]
+    Description: "Tall floor lamp next to bed in Master Bedroom."
+    location: "Master Bedroom"
+    state: null
+
+  office_tapo_switch:
+    ip: "192.168.0.120"
+    type: "tapo_switch"
+    tapo_user: "your_tapo_email@example.com"   # Replace with env var alternative in production
+    tapo_pass: "YOUR_TAPO_PASSWORD"           # DO NOT commit real passwords
+    commands: ["on", "off", "toggle"]
+    Description: "Tapo smart switch controlling the office lights"
+    location: "office"
+    state: null
+
+# Groups let you address sets of devices
+groups:
+  all_devices:
+    name: "All Devices"
+    type: "dynamic"
+    description: "All devices in the system"
+
+  all_lights:
+    name: "All Lights"
+    type: "filtered"
+    description: "All lights in the house"
+    filter:
+      type: "esp_relay"
+
+  living_room:
+    name: "Living Room"
+    type: "filtered"
+    description: "All devices in the living room"
+    filter:
+      location: "living_room"

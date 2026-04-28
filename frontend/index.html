@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi V2 - Autonomous Hub</title>
+    <!-- Modern Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --user-msg: #334155;
+            --ai-msg: #0ea5e9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: -webkit-linear-gradient(#38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-window {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            background-color: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .action-log {
+            font-size: 12px;
+            color: #cbd5e1;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+
+        .input-area {
+            padding: 20px;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .chip {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 14px 20px;
+            border-radius: 30px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-hover);
+        }
+
+        button.send-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        button.send-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            align-self: flex-start;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 14px;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Lumi V2 Hub</h1>
+        <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">Autonomous Neural Interface</div>
+    </div>
+
+    <div class="chat-window" id="chatWindow">
+        <div class="message ai-message">
+            Initializing connection... Connected.<br>
+            Hello! I am Lumi V2. I've been upgraded to support TP-Link Tapo devices natively with structured logic. What would you like me to do?
+        </div>
+    </div>
+    
+    <div class="loading" id="loadingIndicator">
+        Lumi is thinking...
+    </div>
+
+    <div class="input-area">
+        <div class="suggestion-chips">
+            <button class="chip" onclick="applySuggestion(this)">Turn on the living room lamps</button>
+            <button class="chip" onclick="applySuggestion(this)">What is the status of all devices?</button>
+            <button class="chip" onclick="applySuggestion(this)">Toggle the office tapo switch</button>
+            <button class="chip" onclick="applySuggestion(this)">Turn everything off</button>
+        </div>
+        <form class="chat-form" id="chatForm">
+            <input type="text" id="userInput" placeholder="Ask Lumi gently..." autocomplete="off" required>
+            <button type="submit" class="send-btn">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatWindow = document.getElementById('chatWindow');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    function applySuggestion(btn) {
+        userInput.value = btn.innerText;
+        userInput.focus();
+    }
+
+    function addMessage(text, sender, actionsLog = null) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}-message`;
+        msgDiv.innerText = text;
+
+        if (actionsLog && actionsLog.length > 0) {
+            const logDiv = document.createElement('div');
+            logDiv.className = 'action-log';
+            let htmlList = '<strong>Actions Taken:</strong><ul>';
+            actionsLog.forEach(action => {
+                let status = action.result?.status === 'success' ? '✅' : '❌';
+                htmlList += `<li>${status} ${action.device_id} -> ${action.command}</li>`;
+            });
+            htmlList += '</ul>';
+            logDiv.innerHTML = htmlList;
+            msgDiv.appendChild(logDiv);
+        }
+
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        userInput.value = '';
+        loadingIndicator.style.display = 'block';
+        chatWindow.appendChild(loadingIndicator);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        try {
+            const response = await fetch('/api/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: text })
+            });
+
+            loadingIndicator.style.display = 'none';
+
+            if (!response.ok) {
+                addMessage("I'm sorry, my neural pathways experienced an error.", 'ai');
+                return;
+            }
+
+            const data = await response.json();
+            const reply = data.reply || "Done.";
+            const actions = data.actions_taken || [];
+
+            addMessage(reply, 'ai', actions);
+        } catch (err) {
+            loadingIndicator.style.display = 'none';
+            addMessage("Network Error: Could not reach the Lumi core server.", 'ai');
+        }
+    });
+
+</script>
+</body>
+</html>
